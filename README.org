@@ -1,0 +1,26 @@
+* www-synonyms.el
+  Get and insert synonms in many lanuges such as english (uk and us), german, french, italian, spanish, russian,
+  norwegian, greek, protuguese, slovakian and romanian in buffer.
+** Install
+   Use =M-x package-install RET www-synonyms= to install. Make sure you have
+   the [[http://melpa.milkbox.net/][MELPA]] package archive enabled in your init.el or .emacs and your package
+   contents are up to date (use =M-x package-refresh-contents= if you can't
+   find the www-synonyms package and you've added MELPA to your package archives.
+** Configuration
+   1. get key [[http://thesaurus.altervista.org/mykey][key for web api]]
+   2. in your .emacs
+#+BEGIN_SRC emacs-lisp
+(require 'www-synonyms)
+
+;; get key here: http://thesaurus.altervista.org/mykey
+(setq www-synonyms-key "your api key")
+
+;; any of: it, fr, de, en, el, es, no, pt, ro, ru, sk
+(www-synonyms-change-lang "de")
+
+#+END_SRC
+** Usage
+   =M-x www-synonyms-insert-synonym=
+   =M-x www-synonyms-change-language RETURN en=
+** License
+   Same as Emacs, see the file LICENSE for more info
