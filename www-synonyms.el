@@ -57,36 +57,36 @@
 (defun www-synonyms-format-candidates (response)
   "Parse synonyms from parse web json RESPONSE."
   (mapcar (lambda (c) (cons c (replace-regexp-in-string "\s*(.*?).*?" "" c)))
-		  (car (mapcar (lambda (res) (split-string (cdr (car (cdr (car res)))) "|"))
-					   (cdr (assoc 'response response))))))
+          (car (mapcar (lambda (res) (split-string (cdr (car (cdr (car res)))) "|"))
+                       (cdr (assoc 'response response))))))
 
 (defun www-synonyms-change-lang (lang-prefix)
   "Change language via LANG-PREFIX that synonyms are found for."
   (interactive "sLanguage Prefix: ")
   (let ((lang-map '(("it" . "it_IT")
-					("fr" . "fr_FR")
-					("de" . "de_DE")
-					("en" . "en_US")
-					("el" . "el_GR")
-					("es" . "es_ES")
-					("no" . "no_NO")
-					("pt" . "pt_PT")
-					("ro" . "ro_RO")
-					("ru" . "ru_RU")
-					("sk" . "sk_SK"))))
-	(setq www-synonyms-lang (cdr (assoc lang-prefix lang-map)))
-	(unless www-synonyms-lang
-	  (message (concat
-				(format "language prefix: '%s' not supported " lang-prefix)
-				(format "use any of: '%s'" (mapconcat 'car lang-map ", ")))))))
+                    ("fr" . "fr_FR")
+                    ("de" . "de_DE")
+                    ("en" . "en_US")
+                    ("el" . "el_GR")
+                    ("es" . "es_ES")
+                    ("no" . "no_NO")
+                    ("pt" . "pt_PT")
+                    ("ro" . "ro_RO")
+                    ("ru" . "ru_RU")
+                    ("sk" . "sk_SK"))))
+    (setq www-synonyms-lang (cdr (assoc lang-prefix lang-map)))
+    (unless www-synonyms-lang
+      (message (concat
+                (format "language prefix: '%s' not supported " lang-prefix)
+                (format "use any of: '%s'" (mapconcat 'car lang-map ", ")))))))
 
 (defun www-synonyms-insert-synonym ()
   "Insert/replace word with synonym."
   (interactive)
   (let* ((bounds (www-synonyms-get-bounds))
          (word   (when bounds
-					 (buffer-substring-no-properties (car bounds) (cdr bounds)))))
-	(setq word (read-string "Word: " word))
+                     (buffer-substring-no-properties (car bounds) (cdr bounds)))))
+    (setq word (read-string "Word: " word))
     (request
      "http://thesaurus.altervista.org/thesaurus/v1"
      :params `(("key"      . ,www-synonyms-key)
@@ -94,15 +94,15 @@
                ("word"     . ,word)
                ("output"   . "json"))
      :parser 'json-read
-	 :sync t
-	 :error (function* (lambda (&key error-thrown &allow-other-keys)
-						 (if (equal '(error http 403) error-thrown)
-							 (message
-							  "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
-							  www-synonyms-key)
-						   (let ((lang-of-prefix '(("it_IT" . "italian")
-												   ("fr_FR" . "french")
-												   ("de_DE" . "german")
+     :sync t
+     :error (function* (lambda (&key error-thrown &allow-other-keys)
+                         (if (equal '(error http 403) error-thrown)
+                             (message
+                              "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
+                              www-synonyms-key)
+                           (let ((lang-of-prefix '(("it_IT" . "italian")
+                                                   ("fr_FR" . "french")
+                                                   ("de_DE" . "german")
 												   ("en_US" . "english (us)")
 												   ("el_GR" . "english (gr)")
 												   ("es_ES" . "spanish")
