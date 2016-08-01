@@ -31,9 +31,9 @@
 ;;  - italian
 ;;  - french
 ;;  - spansih
-;;  - russian
+;;  - russioan
 ;;  - norwegian
-;;  - greek
+;;  - greece
 ;;  - portuguese
 ;;  - slovakian
 ;;  - romanian
@@ -47,19 +47,20 @@
 (defvar www-synonyms-lang "en_US")
 (defvar www-synonyms-key "")
 
-(defun www-synonyms-get-bounds ()
+(defun www-synonyms/get-bounds ()
   "Get bounds of current region or symbol."
   (interactive)
   (if (use-region-p)
       (cons (region-beginning) (region-end))
     (bounds-of-thing-at-point 'symbol)))
 
-(defun www-synonyms-format-candidates (response)
+(defun www-synonyms/format-candidates (response)
   "Parse synonyms from parse web json RESPONSE."
   (mapcar (lambda (c) (cons c (replace-regexp-in-string "\s*(.*?).*?" "" c)))
           (car (mapcar (lambda (res) (split-string (cdr (car (cdr (car res)))) "|"))
                        (cdr (assoc 'response response))))))
 
+;;;###autoload
 (defun www-synonyms-change-lang (lang-prefix)
   "Change language via LANG-PREFIX that synonyms are found for."
   (interactive "sLanguage Prefix: ")
@@ -80,10 +81,11 @@
                 (format "language prefix: '%s' not supported " lang-prefix)
                 (format "use any of: '%s'" (mapconcat 'car lang-map ", ")))))))
 
+;;;###autoload
 (defun www-synonyms-insert-synonym ()
   "Insert/replace word with synonym."
   (interactive)
-  (let* ((bounds (www-synonyms-get-bounds))
+  (let* ((bounds (www-synonyms/get-bounds))
          (word   (when bounds
                      (buffer-substring-no-properties (car bounds) (cdr bounds)))))
     (setq word (read-string "Word: " word))
@@ -115,9 +117,9 @@
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (let ((syns-helm-source `((name       . "Synonyms")
-                                           (candidates . ,(www-synonyms-format-candidates data))
+                                           (candidates . ,(www-synonyms/format-candidates data))
                                            (action . (lambda (candidate)
-                                                       (let ((bounds (www-synonyms-get-bounds)))
+                                                       (let ((bounds (www-synonyms/get-bounds)))
                                                          (when bounds
                                                            (delete-region (car bounds) (cdr bounds)))
                                                          (insert candidate)))))))
