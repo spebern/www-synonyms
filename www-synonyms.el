@@ -5,6 +5,7 @@
 ;; Author: Bernhard Specht <bernhard@specht.net>
 ;; Keywords: lisp
 ;; Version: 0.0.1
+;; Package-Requires: ((request "0.2.0") (cl-lib "0.5") (helm-core "1.9.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -43,13 +44,15 @@
 ;;; Code:
 
 (require 'request)
+(require 'cl-lib)
+(require 'helm)
+(require 'json)
 
 (defvar www-synonyms-lang "en_US")
 (defvar www-synonyms-key "")
 
 (defun www-synonyms/get-bounds ()
   "Get bounds of current region or symbol."
-  (interactive)
   (if (use-region-p)
       (cons (region-beginning) (region-end))
     (bounds-of-thing-at-point 'symbol)))
@@ -97,24 +100,24 @@
                ("output"   . "json"))
      :parser 'json-read
      :sync t
-     :error (function* (lambda (&key error-thrown &allow-other-keys)
-                         (if (equal '(error http 403) error-thrown)
-                             (message
-                              "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
-                              www-synonyms-key)
-                           (let ((lang-of-prefix '(("it_IT" . "italian")
-                                                   ("fr_FR" . "french")
-                                                   ("de_DE" . "german")
-                                                   ("en_US" . "english (us)")
-                                                   ("el_GR" . "english (gr)")
-                                                   ("es_ES" . "spanish")
-                                                   ("no_NO" . "norwegian")
-                                                   ("pt_PT" . "portuguese")
-                                                   ("ro_RO" . "romanian")
-                                                   ("ru_RU" . "russian")
-                                                   ("sk_SK" . "slovakian"))))
-                             (message "no synonyms found in language: '%s'" (cdr (assoc www-synonyms-lang lang-of-prefix)))))))
-     :success (function*
+     :error (cl-function (lambda (&key error-thrown &allow-other-keys)
+                           (if (equal '(error http 403) error-thrown)
+                               (message
+                                "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
+                                www-synonyms-key)
+                             (let ((lang-of-prefix '(("it_IT" . "italian")
+                                                     ("fr_FR" . "french")
+                                                     ("de_DE" . "german")
+                                                     ("en_US" . "english (us)")
+                                                     ("el_GR" . "english (gr)")
+                                                     ("es_ES" . "spanish")
+                                                     ("no_NO" . "norwegian")
+                                                     ("pt_PT" . "portuguese")
+                                                     ("ro_RO" . "romanian")
+                                                     ("ru_RU" . "russian")
+                                                     ("sk_SK" . "slovakian"))))
+                               (message "no synonyms found in language: '%s'" (cdr (assoc www-synonyms-lang lang-of-prefix)))))))
+     :success (cl-function
                (lambda (&key data &allow-other-keys)
                  (let ((syns-helm-source `((name       . "Synonyms")
                                            (candidates . ,(www-synonyms/format-candidates data))
