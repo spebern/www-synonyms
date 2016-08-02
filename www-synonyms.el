@@ -64,26 +64,15 @@
                        (cdr (assoc 'response response))))))
 
 ;;;###autoload
-(defun www-synonyms-change-lang (lang-prefix)
+(defun www-synonyms-change-lang ()
   "Change language via LANG-PREFIX that synonyms are found for."
-  (interactive "sLanguage Prefix: ")
-  (let ((lang-map '(("it" . "it_IT")
-                    ("fr" . "fr_FR")
-                    ("de" . "de_DE")
-                    ("en" . "en_US")
-                    ("el" . "el_GR")
-                    ("es" . "es_ES")
-                    ("no" . "no_NO")
-                    ("pt" . "pt_PT")
-                    ("ro" . "ro_RO")
-                    ("ru" . "ru_RU")
-                    ("sk" . "sk_SK"))))
-    (setq www-synonyms-lang (cdr (assoc lang-prefix lang-map)))
-    (unless www-synonyms-lang
-      (message (concat
-                (format "language prefix: '%s' not supported " lang-prefix)
-                (format "use any of: '%s'" (mapconcat 'car lang-map ", ")))))))
-
+  (interactive)
+  (let ((syns-helm-source `((name       . "Language prefix")
+                           (candidates . (it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK))
+                           (action . (lambda (candidate)
+                                       (setq www-synonyms-lang candidate))))))
+    (helm :sources syns-helm-source)))
+    
 ;;;###autoload
 (defun www-synonyms-insert-synonym ()
   "Insert/replace word with synonym."
