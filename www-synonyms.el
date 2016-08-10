@@ -5,7 +5,7 @@
 ;; Author: Bernhard Specht <bernhard@specht.net>
 ;; Keywords: lisp
 ;; Version: 0.0.1
-;; Package-Requires: ((request "0.2.0") (cl-lib "0.5") (helm-core "1.9.1"))
+;; Package-Requires: ((request "0.2.0") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@
 
 (require 'request)
 (require 'cl-lib)
-(require 'helm)
 (require 'json)
 
 (defvar www-synonyms--lang "en_US")
@@ -67,13 +66,12 @@
 (defun www-synonyms--change-lang ()
   "Change language via LANG-PREFIX that synonyms are found for."
   (interactive)
-  (let ((syns-helm-source `((name       . "Language prefix")
-                           (candidates . (it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK))
-                           (action . (lambda (candidate)
-                                       (setq www-synonyms--lang candidate))))))
-    (helm :sources syns-helm-source)))
-    
-;;;###autoload
+  (completing-read
+   "Language Prefix:"
+   '(it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK)
+   nil
+   nil))
+
 (defun www-synonyms--insert-synonym ()
   "Insert/replace word with synonym."
   (interactive)
@@ -108,14 +106,11 @@
                                (message "no synonyms found in language: '%s'" (cdr (assoc www-synonyms--lang lang-of-prefix)))))))
      :success (cl-function
                (lambda (&key data &allow-other-keys)
-                 (let ((syns-helm-source `((name       . "Synonyms")
-                                           (candidates . ,(www-synonyms/format-candidates data))
-                                           (action . (lambda (candidate)
-                                                       (let ((bounds (www-synonyms/get-bounds)))
-                                                         (when bounds
-                                                           (delete-region (car bounds) (cdr bounds)))
-                                                         (insert candidate)))))))
-                   (helm :sources syns-helm-source)))))))
+                 (let ((candidate (completing-read "Synonym:" (www-synonyms/format-candidates data) nil nil))
+                       (bounds (www-synonyms/get-bounds)))
+                   (when bounds
+                     (delete-region (car bounds) (cdr bounds)))
+                   (insert candidate)))))))
 
 (provide 'www-synonyms)
 
