@@ -31,8 +31,8 @@
 ;;  - german
 ;;  - italian
 ;;  - french
-;;  - spansih
-;;  - russioan
+;;  - spanish
+;;  - russian
 ;;  - norwegian
 ;;  - greece
 ;;  - portuguese
