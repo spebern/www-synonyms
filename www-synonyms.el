@@ -48,8 +48,8 @@
 (require 'helm)
 (require 'json)
 
-(defvar www-synonyms-lang "en_US")
-(defvar www-synonyms-key "")
+(defvar www-synonyms--lang "en_US")
+(defvar www-synonyms--key "")
 
 (defun www-synonyms/get-bounds ()
   "Get bounds of current region or symbol."
@@ -64,17 +64,17 @@
                        (cdr (assoc 'response response))))))
 
 ;;;###autoload
-(defun www-synonyms-change-lang ()
+(defun www-synonyms--change-lang ()
   "Change language via LANG-PREFIX that synonyms are found for."
   (interactive)
   (let ((syns-helm-source `((name       . "Language prefix")
                            (candidates . (it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK))
                            (action . (lambda (candidate)
-                                       (setq www-synonyms-lang candidate))))))
+                                       (setq www-synonyms--lang candidate))))))
     (helm :sources syns-helm-source)))
     
 ;;;###autoload
-(defun www-synonyms-insert-synonym ()
+(defun www-synonyms--insert-synonym ()
   "Insert/replace word with synonym."
   (interactive)
   (let* ((bounds (www-synonyms/get-bounds))
@@ -83,8 +83,8 @@
     (setq word (read-string "Word: " word))
     (request
      "http://thesaurus.altervista.org/thesaurus/v1"
-     :params `(("key"      . ,www-synonyms-key)
-               ("language" . ,www-synonyms-lang)
+     :params `(("key"      . ,www-synonyms--key)
+               ("language" . ,www-synonyms--lang)
                ("word"     . ,word)
                ("output"   . "json"))
      :parser 'json-read
@@ -93,7 +93,7 @@
                            (if (equal '(error http 403) error-thrown)
                                (message
                                 "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
-                                www-synonyms-key)
+                                www-synonyms--key)
                              (let ((lang-of-prefix '(("it_IT" . "italian")
                                                      ("fr_FR" . "french")
                                                      ("de_DE" . "german")
@@ -105,7 +105,7 @@
                                                      ("ro_RO" . "romanian")
                                                      ("ru_RU" . "russian")
                                                      ("sk_SK" . "slovakian"))))
-                               (message "no synonyms found in language: '%s'" (cdr (assoc www-synonyms-lang lang-of-prefix)))))))
+                               (message "no synonyms found in language: '%s'" (cdr (assoc www-synonyms--lang lang-of-prefix)))))))
      :success (cl-function
                (lambda (&key data &allow-other-keys)
                  (let ((syns-helm-source `((name       . "Synonyms")
