@@ -1,5 +1,5 @@
 * www-synonyms.el
-  Get and insert synonms in many lanuges such as english (uk and us), german, french, italian, spanish, russian,
+  Get and insert synonyms in many languages such as english (uk and us), german, french, italian, spanish, russian,
   norwegian, protuguese, slovakian and romanian in buffer.
 ** Install
    Use =M-x package-install RET www-synonyms= to install. Make sure you have
