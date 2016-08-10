@@ -34,7 +34,6 @@
 ;;  - spanish
 ;;  - russian
 ;;  - norwegian
-;;  - greece
 ;;  - portuguese
 ;;  - slovakian
 ;;  - romanian
