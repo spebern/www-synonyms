@@ -1,6 +1,6 @@
 * www-synonyms.el
   Get and insert synonms in many lanuges such as english (uk and us), german, french, italian, spanish, russian,
-  norwegian, greek, protuguese, slovakian and romanian in buffer.
+  norwegian, protuguese, slovakian and romanian in buffer.
 ** Install
    Use =M-x package-install RET www-synonyms= to install. Make sure you have
    the [[http://melpa.milkbox.net/][MELPA]] package archive enabled in your init.el or .emacs and your package
@@ -21,6 +21,7 @@
 #+END_SRC
 ** Usage
    =M-x www-synonyms-insert-synonym=
+
    =M-x www-synonyms-change-language RETURN en=
 ** License
    Same as Emacs, see the file LICENSE for more info

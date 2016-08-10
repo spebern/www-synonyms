@@ -65,11 +65,7 @@
 (defun www-synonyms--change-lang ()
   "Change language via LANG-PREFIX that synonyms are found for."
   (interactive)
-  (completing-read
-   "Language Prefix:"
-   '(it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK)
-   nil
-   nil))
+  (completing-read "Language Prefix:" '(it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK) nil nil))
 
 (defun www-synonyms--insert-synonym ()
   "Insert/replace word with synonym."
