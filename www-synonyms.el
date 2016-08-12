@@ -4,7 +4,7 @@
 
 ;; Author: Bernhard Specht <bernhard@specht.net>
 ;; Keywords: lisp
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Package-Requires: ((request "0.2.0") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
