@@ -65,7 +65,7 @@
 (defun www-synonyms-change-lang ()
   "Change language via LANG-PREFIX that synonyms are found for."
   (interactive)
-  (completing-read "Language Prefix:" '(it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK) nil nil))
+  (completing-read "Language Prefix:" '(it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK)))
 
 (defun www-synonyms-insert-synonym ()
   "Insert/replace word with synonym."
@@ -101,11 +101,12 @@
                                (message "no synonyms found in language: '%s'" (cdr (assoc www-synonyms-lang lang-of-prefix)))))))
      :success (cl-function
                (lambda (&key data &allow-other-keys)
-                 (let ((candidate (completing-read "Synonym:" (www-synonyms--format-candidates data) nil nil))
+                 (let ((candidate (completing-read "Synonym:" (www-synonyms--format-candidates data)))
                        (bounds (www-synonyms--get-bounds)))
-                   (when bounds
-                     (delete-region (car bounds) (cdr bounds)))
-                   (insert candidate)))))))
+                   (when candidate
+                     (when bounds
+                       (delete-region (car bounds) (cdr bounds)))
+                     (insert candidate))))))))
 
 (provide 'www-synonyms)
 
