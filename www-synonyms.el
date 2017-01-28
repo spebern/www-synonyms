@@ -4,7 +4,7 @@
 
 ;; Author: Bernhard Specht <bernhard@specht.net>
 ;; Keywords: lisp
-;; Version: 0.0.4
+;; Version: 0.0.5
 ;; Package-Requires: ((request "0.2.0") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,18 @@
 
 (defvar www-synonyms-lang "en_US")
 (defvar www-synonyms-key "")
+(defvar www-synonyms--lang-of-prefix
+  '(("it_IT" . "italian")
+    ("fr_FR" . "french")
+    ("de_DE" . "german")
+    ("en_US" . "english (us)")
+    ("el_GR" . "english (gr)")
+    ("es_ES" . "spanish")
+    ("no_NO" . "norwegian")
+    ("pt_PT" . "portuguese")
+    ("ro_RO" . "romanian")
+    ("ru_RU" . "russian")
+    ("sk_SK" . "slovakian")))
 
 (defun www-synonyms--get-bounds ()
   "Get bounds of current region or symbol."
@@ -86,26 +98,17 @@
       (if (equal '(error http 403) error-thrown)
           (message
            "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
-           www-synonyms-key)
-        (let ((lang-of-prefix '(("it_IT" . "italian")
-                                ("fr_FR" . "french")
-                                ("de_DE" . "german")
-                                ("en_US" . "english (us)")
-                                ("el_GR" . "english (gr)")
-                                ("es_ES" . "spanish")
-                                ("no_NO" . "norwegian")
-                                ("pt_PT" . "portuguese")
-                                ("ro_RO" . "romanian")
-                                ("ru_RU" . "russian")
-                                ("sk_SK" . "slovakian"))))
-          (message "no synonyms found in language: '%s'"
-                   (cdr (assoc www-synonyms-lang lang-of-prefix)))))))))
+           www-synonyms-key))))))
+
 
 ;;;###autoload
 (defun www-synonyms-change-lang ()
   "Change language via LANG-PREFIX that synonyms are found for."
   (interactive)
-  (completing-read "Language Prefix:" '(it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK)))
+  (setq www-synonyms-lang
+        (car (rassoc
+              (completing-read "Language Prefix:" (mapcar 'cdr www-synonyms--lang-of-prefix))
+              www-synonyms--lang-of-prefix))))
 
 (defun www-synonyms-insert-synonym ()
   "Insert or replace a word with synonym."
@@ -117,12 +120,15 @@
          (response (www-synonyms--request-synonyms word)))
     (when response
       (let* ((data (request-response-data response))
-             (candidates (www-synonyms--format-candidates data))
-             (candidate  (cdr (assoc (completing-read "Synonym: " candidates) candidates))))
-        (when candidate
-          (when bounds
-            (delete-region (car bounds) (cdr bounds)))
-          (insert candidate))))))
+             (candidates (www-synonyms--format-candidates data)))
+        (if candidates
+            (let ((candidate  (cdr (assoc (completing-read "Synonym: " candidates) candidates))))
+              (when candidate
+                (when bounds
+                  (delete-region (car bounds) (cdr bounds)))
+                (insert candidate)))
+          (message "no synonyms found in language: '%s'"
+                   (cdr (assoc www-synonyms-lang www-synonyms--lang-of-prefix)))))))))
 
 (provide 'www-synonyms)
 
