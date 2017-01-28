@@ -4,7 +4,7 @@
 
 ;; Author: Bernhard Specht <bernhard@specht.net>
 ;; Keywords: lisp
-;; Version: 0.0.2
+;; Version: 0.0.3
 ;; Package-Requires: ((request "0.2.0") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@
 
 (defvar www-synonyms-lang "en_US")
 (defvar www-synonyms-key "")
+(setq www-synonyms-key "Bz2c82RauXsAZzCv6hnr")
 
 (defun www-synonyms--get-bounds ()
   "Get bounds of current region or symbol."
@@ -57,9 +58,49 @@
 
 (defun www-synonyms--format-candidates (response)
   "Parse synonyms from parse web json RESPONSE."
-  (mapcar (lambda (c) (cons c (replace-regexp-in-string "\s*(.*?).*?" "" c)))
-          (car (mapcar (lambda (res) (split-string (cdr (car (cdr (car res)))) "|"))
-                       (cdr (assoc 'response response))))))
+  (let ((candidates
+         (mapcan (lambda (x)
+                   (let* ((synonym-struct (cdr (car x)))
+                          (category (cdr (assoc 'category synonym-struct)))
+                          (synonyms (split-string
+                                     (cdr (assoc 'synonyms synonym-struct))
+                                     "|")))
+                     (mapcar (lambda (synonym) (cons (concat category ": " synonym) synonym )) synonyms)))
+                 (cdr (assoc 'response response)))))
+    (cl-remove-duplicates candidates
+                          :test 'equal
+                          :key 'car)))
+
+(defun www-synonyms--request-synonyms (word)
+  "Get response from websites containing sysnonyms for WORD."
+  (request
+   "http://thesaurus.altervista.org/thesaurus/v1"
+   :params `(("key"      . ,www-synonyms-key)
+             ("language" . ,www-synonyms-lang)
+             ("word"     . ,word)
+             ("output"   . "json"))
+   :parser 'json-read
+   :sync t
+   :error
+   (cl-function
+    (lambda (&key error-thrown &allow-other-keys)
+      (if (equal '(error http 403) error-thrown)
+          (message
+           "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
+           www-synonyms-key)
+        (let ((lang-of-prefix '(("it_IT" . "italian")
+                                ("fr_FR" . "french")
+                                ("de_DE" . "german")
+                                ("en_US" . "english (us)")
+                                ("el_GR" . "english (gr)")
+                                ("es_ES" . "spanish")
+                                ("no_NO" . "norwegian")
+                                ("pt_PT" . "portuguese")
+                                ("ro_RO" . "romanian")
+                                ("ru_RU" . "russian")
+                                ("sk_SK" . "slovakian"))))
+          (message "no synonyms found in language: '%s'"
+                   (cdr (assoc www-synonyms-lang lang-of-prefix)))))))))
 
 ;;;###autoload
 (defun www-synonyms-change-lang ()
@@ -68,45 +109,21 @@
   (completing-read "Language Prefix:" '(it_IT fr_FR de_DE en_US el_GR es_ES no_NO pt_PT ro_RO ru_RU sk_SK)))
 
 (defun www-synonyms-insert-synonym ()
-  "Insert/replace word with synonym."
+  "Insert or replace a word with synonym."
   (interactive)
   (let* ((bounds (www-synonyms--get-bounds))
-         (word   (when bounds
-                     (buffer-substring-no-properties (car bounds) (cdr bounds)))))
-    (setq word (read-string "Word: " word))
-    (request
-     "http://thesaurus.altervista.org/thesaurus/v1"
-     :params `(("key"      . ,www-synonyms-key)
-               ("language" . ,www-synonyms-lang)
-               ("word"     . ,word)
-               ("output"   . "json"))
-     :parser 'json-read
-     :sync t
-     :error (cl-function (lambda (&key error-thrown &allow-other-keys)
-                           (if (equal '(error http 403) error-thrown)
-                               (message
-                                "key: '%s' probably incorrect. Get new one from: 'http://thesaurus.altervista.org/mykey'"
-                                www-synonyms-key)
-                             (let ((lang-of-prefix '(("it_IT" . "italian")
-                                                     ("fr_FR" . "french")
-                                                     ("de_DE" . "german")
-                                                     ("en_US" . "english (us)")
-                                                     ("el_GR" . "english (gr)")
-                                                     ("es_ES" . "spanish")
-                                                     ("no_NO" . "norwegian")
-                                                     ("pt_PT" . "portuguese")
-                                                     ("ro_RO" . "romanian")
-                                                     ("ru_RU" . "russian")
-                                                     ("sk_SK" . "slovakian"))))
-                               (message "no synonyms found in language: '%s'" (cdr (assoc www-synonyms-lang lang-of-prefix)))))))
-     :success (cl-function
-               (lambda (&key data &allow-other-keys)
-                 (let ((candidate (completing-read "Synonym:" (www-synonyms--format-candidates data)))
-                       (bounds (www-synonyms--get-bounds)))
-                   (when candidate
-                     (when bounds
-                       (delete-region (car bounds) (cdr bounds)))
-                     (insert candidate))))))))
+         (word (if bounds
+                   (buffer-substring-no-properties (car bounds) (cdr bounds))
+                 (read-string "Word: ")))
+         (response (www-synonyms--request-synonyms word)))
+    (when response
+      (let* ((data (request-response-data response))
+             (candidates (www-synonyms--format-candidates data))
+             (candidate  (cdr (assoc (completing-read "Synonym: " candidates) candidates))))
+        (when candidate
+          (when bounds
+            (delete-region (car bounds) (cdr bounds)))
+          (insert candidate))))))
 
 (provide 'www-synonyms)
 
