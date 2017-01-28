@@ -131,7 +131,7 @@
                   (delete-region (car bounds) (cdr bounds)))
                 (insert candidate)))
           (message "no synonyms found in language: '%s'"
-                   (cdr (assoc www-synonyms-lang www-synonyms--lang-of-prefix)))))))))
+                   (cdr (assoc www-synonyms-lang www-synonyms--lang-of-prefix))))))))
 
 (provide 'www-synonyms)
 
