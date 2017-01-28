@@ -4,7 +4,7 @@
 
 ;; Author: Bernhard Specht <bernhard@specht.net>
 ;; Keywords: lisp
-;; Version: 0.0.3
+;; Version: 0.0.4
 ;; Package-Requires: ((request "0.2.0") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,6 @@
 
 (defvar www-synonyms-lang "en_US")
 (defvar www-synonyms-key "")
-(setq www-synonyms-key "Bz2c82RauXsAZzCv6hnr")
 
 (defun www-synonyms--get-bounds ()
   "Get bounds of current region or symbol."
