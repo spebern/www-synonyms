@@ -76,7 +76,10 @@
                           (synonyms (split-string
                                      (cdr (assoc 'synonyms synonym-struct))
                                      "|")))
-                     (mapcar (lambda (synonym) (cons (concat category ": " synonym) synonym )) synonyms)))
+                     (mapcar (lambda (synonym)
+                               (cons
+                                (concat category ": " synonym)
+                                (replace-regexp-in-string "\s*(.*?).*?" "" synonym))) synonyms)))
                  (cdr (assoc 'response response)))))
     (cl-remove-duplicates candidates
                           :test 'equal
